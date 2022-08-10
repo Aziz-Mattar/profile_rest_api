@@ -3,7 +3,10 @@ from rest_framework.response import Response
 from profiles_api.serializers import helloSerializers
 from rest_framework import status
 from rest_framework import viewsets
+from rest_framework.authentication import TokenAuthentication
+from profiles_api.permissions import UpdateOwnProfile
 
+from rest_framework import filters
 class helloworld(APIView):
     """Test API View"""
     serializer_class = helloSerializers
@@ -80,3 +83,13 @@ class HelloWorldViewSet(viewsets.ViewSet):
 
     def destroy(self, request, pk=None):
         return Response({'HTTP_method': 'Delete'})
+
+
+class UserProfileViewSet(viewsets.ModelViewSet):
+    """Handle creating and updating profile"""
+    serializer_class = serializers.UserProfileSerializer
+    queryset = models.UserProfile.objects.all()
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (UpdateOwnProfile,)
+    filters_backends = (filters.SearchFilter,)
+    search_fields = ('name', 'email',)
