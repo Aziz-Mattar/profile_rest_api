@@ -6,6 +6,7 @@ from profiles_api.permissions import UpdateOwnProfile
 from profiles_api import permissions, serializers, models
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.settings import api_settings
+from rest_framework.permissions import IsAuthenticated
 
 # class helloworld(APIView):
 #     """Test API View"""
@@ -97,7 +98,7 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name', 'email',)
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (permissions.UpdateOwnProfile,)
+    permission_classes = (permissions.UpdateOwnProfile)
 
 
 # class UserLoginView(ObtainAuthToken):
@@ -109,3 +110,20 @@ from rest_framework.settings import api_settings
 class UserLoginApiView(ObtainAuthToken):
    """Handle creating user authentication tokens"""
    renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
+
+
+
+class ProfileFeedItemViewSet(viewsets.ModelViewSet):
+    """Handle creating, creating and updating profiles"""
+    serializer_class = serializers.ProfileFeedItemSerializer
+    queryset = models.ProfileFeedItem.objects.all()
+    authentication_classes = (TokenAuthentication,)
+
+    def perform_create(self, serializer):
+        """Sets the user profile to the logged in user"""
+        serializer.save(user_profile=self.request.user)
+
+    permission_classes = (
+        permissions.UpdateOwnStatus,
+        IsAuthenticated
+    )
